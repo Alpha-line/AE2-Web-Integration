@@ -38,6 +38,6 @@
  * For more details, see https://docs.gradle.org/8.4/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-    api rfg.deobf("curse.maven:ae2-extended-life-570458:5411078") // AE2UEL 0.56.6
+    api rfg.deobf("curse.maven:ae2-extended-life-570458:6302098") // AE2UEL 0.56.7
     devOnlyNonPublishable(rfg.deobf("curse.maven:ae2-fluid-crafting-rework-623955:5751930"))
 }
