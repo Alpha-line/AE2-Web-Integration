@@ -35,5 +35,24 @@
 		"dependencies": [],
 		"dependants": [],
 		"useDependencyInformation": false
-	}]
+	},
+		{
+			"modid": "ae2webintegration-atlasgenerator",
+			"name": "AE2WebIntegration-AtlasGenerator",
+			"description": "AE2 Web Integration mod - Items atlas generator",
+			"version": "${version}",
+			"mcversion": "${mcversion}",
+			"url": "https://github.com/kuba6000/AE2-Web-Integration",
+			"updateUrl": "",
+			"authorList": ["Alphaline_"],
+			"credits": "",
+			"logoFile": "",
+			"screenshots": [],
+			"parent": "",
+			"requiredMods": [],
+			"dependencies": [],
+			"dependants": [],
+			"useDependencyInformation": false,
+			"clientSideOnly": true
+		}]
 }
