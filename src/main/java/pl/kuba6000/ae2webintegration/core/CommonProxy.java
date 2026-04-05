@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 import pl.kuba6000.ae2webintegration.Tags;
 import pl.kuba6000.ae2webintegration.core.commands.BaseCommandHandler;
 import pl.kuba6000.ae2webintegration.core.discord.DiscordManager;
+import pl.kuba6000.ae2webintegration.core.icons.IconCache;
 import pl.kuba6000.ae2webintegration.core.utils.VersionChecker;
 
 public class CommonProxy {
@@ -20,6 +21,8 @@ public class CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         Config.init(event.getModConfigurationDirectory());
         Config.synchronizeConfiguration();
+        IconCache.init(event.getModConfigurationDirectory());
+        IconCache.loadCache();
         WebData.loadData();
         GridData.loadData();
 

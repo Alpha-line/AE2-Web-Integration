@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import pl.kuba6000.ae2webintegration.core.AE2Controller;
 import pl.kuba6000.ae2webintegration.core.Config;
 import pl.kuba6000.ae2webintegration.core.WebData;
+import pl.kuba6000.ae2webintegration.core.icons.IconCache;
 
 public class BaseCommandHandler extends CommandBase {
 
@@ -53,6 +54,12 @@ public class BaseCommandHandler extends CommandBase {
                 return;
             }
             Config.synchronizeConfiguration();
+            int nbLoadedIcons = IconCache.loadCache();
+            if (nbLoadedIcons >= 0) {
+                sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Successfully loaded " + nbLoadedIcons + " icons"));
+            } else {
+                sender.sendMessage(new TextComponentString(TextFormatting.RED + "Error while loading icons, check console for details"));
+            }
             AE2Controller.stopHTTPServer();
             AE2Controller.startHTTPServer();
             sender.sendMessage(
