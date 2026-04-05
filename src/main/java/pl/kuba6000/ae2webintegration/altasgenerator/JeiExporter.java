@@ -3,12 +3,14 @@ package pl.kuba6000.ae2webintegration.altasgenerator;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.JEIPlugin;
+import mezz.jei.api.ingredients.IIngredientBlacklist;
 import mezz.jei.api.ingredients.VanillaTypes;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @JEIPlugin
 public class JeiExporter implements IModPlugin {
@@ -29,6 +31,11 @@ public class JeiExporter implements IModPlugin {
             return new ArrayList<>();
         }
 
-        return iModRegistry.getIngredientRegistry().getAllIngredients(VanillaTypes.ITEM);
+        IIngredientBlacklist ingredientBlacklist = iModRegistry.getJeiHelpers().getIngredientBlacklist();
+
+        return iModRegistry.getIngredientRegistry().getAllIngredients(VanillaTypes.ITEM)
+                .stream()
+                .filter(item -> !ingredientBlacklist.isIngredientBlacklisted(item))
+                .collect(Collectors.toList());
     }
 }

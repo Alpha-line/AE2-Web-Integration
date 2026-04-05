@@ -13,6 +13,7 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import pl.kuba6000.ae2webintegration.core.icons.IconInfo;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -40,8 +41,7 @@ public class ItemBatchRenderer {
     private final Minecraft mc = Minecraft.getMinecraft();
 
     private final Queue<ItemStack> queue = new LinkedList<>();
-    private final List<String> processedIds = new ArrayList<>();
-    private final Map<String, Integer> processedIndex = new HashMap<>();
+    private final List<IconInfo> iconsList = new ArrayList<>();
     private final Path imageExportPath;
 
     private Framebuffer fbo;
@@ -85,8 +85,6 @@ public class ItemBatchRenderer {
         }
 
         Files.createDirectories(imageExportPath);
-
-
     }
 
     private void cleanup() {
@@ -100,7 +98,7 @@ public class ItemBatchRenderer {
         if (running) return;
 
         queue.clear();
-        processedIds.clear();
+        iconsList.clear();
 
         for (ItemStack stack : items) {
             if (!stack.isEmpty()) {
@@ -136,18 +134,24 @@ public class ItemBatchRenderer {
 
         for (int i = 0; i < batchSize && !queue.isEmpty(); i++) {
             ItemStack stack = queue.poll();
-            String itemStringId = getKey(stack);
 
             try {
-                if (!processedIds.contains(itemStringId)) {
-                    byte[] png = renderItem(stack);
-                    processedIds.add(itemStringId);
-                    processedIndex.put(itemStringId, processed);
-                    Path outPath = imageExportPath.resolve(processed + ".png");
-                    try (OutputStream os = Files.newOutputStream(outPath, StandardOpenOption.CREATE)) {
-                        os.write(png);
-                    }
+                // Generating PNG
+                byte[] png = renderItem(stack);
+                Path outPath = imageExportPath.resolve(processed + ".png");
+                try (OutputStream os = Files.newOutputStream(outPath, StandardOpenOption.CREATE)) {
+                    os.write(png);
                 }
+
+                // Information about the PNG
+                IconInfo iconInfo = new IconInfo();
+                iconInfo.elementId = processed;
+                iconInfo.registryName = stack.getItem().getRegistryName().toString();
+                iconInfo.damageValue = stack.getItemDamage();
+                iconInfo.nbtInfos = stack.getTagCompound();
+                iconInfo.prepareNbtInfosForWrite();
+                iconsList.add(iconInfo);
+
             } catch (Exception e) {
                 AE2WebIntegration.LOG.atError().withThrowable(e).log("Error while generating texture for {}:{}", stack.getItem().getRegistryName(), stack.getItemDamage());
                 if (listener != null) {
@@ -171,7 +175,7 @@ public class ItemBatchRenderer {
             cleanup();
 
             Path jsonOut = imageExportPath.resolve("info.json");
-            String json = new Gson().toJson(processedIndex);
+            String json = new Gson().toJson(iconsList);
             try {
                 Files.write(jsonOut, json.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
             } catch (Exception ex) {
@@ -217,6 +221,10 @@ public class ItemBatchRenderer {
         GlStateManager.enableCull();
         GlStateManager.enableLighting();
 
+        GlStateManager.enableDepth();
+        GlStateManager.depthMask(true);
+        GL11.glClearDepth(1.0);
+
         RenderHelper.enableGUIStandardItemLighting();
 
         RenderItem renderItem = mc.getRenderItem();
@@ -229,7 +237,6 @@ public class ItemBatchRenderer {
 
         // Render element
         renderItem.renderItemAndEffectIntoGUI(stack, 0, 0);
-        renderItem.renderItemOverlays(mc.fontRenderer, stack, 0, 0);
 
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableCull();
@@ -281,9 +288,5 @@ public class ItemBatchRenderer {
         ImageIO.write(image, "png", baos);
 
         return baos.toByteArray();
-    }
-
-    private String getKey(ItemStack stack) {
-        return stack.getItem().getRegistryName() + ":" + stack.getItemDamage();
     }
 }

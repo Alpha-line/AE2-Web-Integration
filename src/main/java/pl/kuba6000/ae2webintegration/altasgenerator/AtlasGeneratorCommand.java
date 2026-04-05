@@ -1,5 +1,6 @@
 package pl.kuba6000.ae2webintegration.altasgenerator;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -55,14 +56,19 @@ public class AtlasGeneratorCommand extends CommandBase {
                 sender.sendMessage(new TextComponentString("The renderer is currently running !"));
             } else {
                 List<ItemStack> registeredItems = new ArrayList<>(JeiExporter.getRegisteredItems());
-                List<ItemStack> list2 = new ArrayList<>();
-                for (int i = 0; i < 50; i++) {
-                    list2.add(registeredItems.get(i));
-                }
 
-                ClientEventHandler.renderer.start(list2);
+                // use argument "small" to generate small atlas
+                ArrayList<String> strings = Lists.newArrayList(args);
+                if (strings.contains("small")) {
+                    List<ItemStack> list2 = new ArrayList<>();
+                    for (int i = 0; i < 50; i++) {
+                        list2.add(registeredItems.get(i));
+                    }
+                    ClientEventHandler.renderer.start(list2);
+                } else {
+                    ClientEventHandler.renderer.start(registeredItems);
+                }
             }
         }
-
     }
 }
