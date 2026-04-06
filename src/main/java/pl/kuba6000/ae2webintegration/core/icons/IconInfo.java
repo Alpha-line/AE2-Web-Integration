@@ -26,12 +26,4 @@ public class IconInfo {
             }
         }
     }
-
-    public void prepareNbtInfosForWrite() {
-        if (nbtInfos == null) {
-            nbtInfosSerial = null;
-        } else {
-            nbtInfosSerial = nbtInfos.toString();
-        }
-    }
 }
