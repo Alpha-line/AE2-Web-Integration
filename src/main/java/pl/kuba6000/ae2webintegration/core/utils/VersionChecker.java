@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import pl.kuba6000.ae2webintegration.Tags;
+import pl.kuba6000.ae2webintegration.core.Config;
 
 public class VersionChecker {
 
@@ -58,9 +59,13 @@ public class VersionChecker {
     }
 
     public static boolean isOutdated() {
-        updateLatestVersion();
-        if (latestTag == null) return false;
-        return !latestTag.equals(Tags.VERSION);
+        if (Config.NOTIFY_UPDATE_AVAILABLE) {
+            updateLatestVersion();
+            if (latestTag == null) return false;
+            return !latestTag.equals(Tags.VERSION);
+        } else {
+            return false;
+        }
     }
 
     public static String getLatestTag() {

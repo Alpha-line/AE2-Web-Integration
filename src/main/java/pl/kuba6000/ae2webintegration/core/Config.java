@@ -19,6 +19,7 @@ public class Config {
     public static boolean ALLOW_NO_PASSWORD_ON_LOCALHOST = true;
     public static boolean AE_PUBLIC_MODE = true;
     public static int AE_MAX_REQUESTS_BEFORE_LOGGED_IN_PER_MINUTE = 20;
+    public static boolean NOTIFY_UPDATE_AVAILABLE = false;
 
     // discord
     public static String DISCORD_WEBHOOK = "";
@@ -30,6 +31,11 @@ public class Config {
 
     public static void synchronizeConfiguration() {
         Configuration configuration = new Configuration(configFile);
+        NOTIFY_UPDATE_AVAILABLE = configuration.getBoolean(
+                "notify_update",
+                Configuration.CATEGORY_GENERAL,
+                NOTIFY_UPDATE_AVAILABLE,
+                "Notify in-game users / website users if an update is available");
         AE_PORT = configuration
             .getInt("port", Configuration.CATEGORY_GENERAL, AE_PORT, 1, 65535, "Port for the hosted website");
         AE_PASSWORD = configuration
