@@ -44,6 +44,7 @@ import pl.kuba6000.ae2webintegration.core.ae2request.sync.CancelCPU;
 import pl.kuba6000.ae2webintegration.core.ae2request.sync.GetCPU;
 import pl.kuba6000.ae2webintegration.core.ae2request.sync.GetCPUList;
 import pl.kuba6000.ae2webintegration.core.ae2request.sync.GetGridList;
+import pl.kuba6000.ae2webintegration.core.ae2request.sync.GetIcons;
 import pl.kuba6000.ae2webintegration.core.ae2request.sync.GetItems;
 import pl.kuba6000.ae2webintegration.core.ae2request.sync.ISyncedRequest;
 import pl.kuba6000.ae2webintegration.core.ae2request.sync.Job;
@@ -137,6 +138,7 @@ public class AE2Controller {
         server.createContext("/get", new SyncedRequestHandler(GetCPU.class));
         server.createContext("/cancelcpu", new SyncedRequestHandler(CancelCPU.class));
         server.createContext("/items", new SyncedRequestHandler(GetItems.class));
+        server.createContext("/icon", new SyncedRequestHandler(GetIcons.class));
         server.createContext("/order", new SyncedRequestHandler(Order.class));
         server.createContext("/job", new SyncedRequestHandler(Job.class));
         server.createContext("/trackinghistory", new ASyncRequestHandler(GetTrackingHistory.class));

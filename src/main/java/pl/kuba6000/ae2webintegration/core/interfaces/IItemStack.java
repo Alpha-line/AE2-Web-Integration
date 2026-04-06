@@ -1,5 +1,7 @@
 package pl.kuba6000.ae2webintegration.core.interfaces;
 
+import net.minecraft.item.ItemStack;
+
 public interface IItemStack {
 
     String web$getItemID();
@@ -21,5 +23,7 @@ public interface IItemStack {
     IItemStack web$copy();
 
     void web$setStackSize(long size);
+
+    ItemStack web$getItemStack();
 
 }
