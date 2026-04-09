@@ -112,8 +112,12 @@ public class IconCache {
         for (String tagKey : itemTags.getKeySet()) {
             byte tagType = itemTags.getTagId(tagKey);
             for (IconInfo iconInfo : iconScoreMap.keySet()) {
-                if (compareValue(itemTags, iconInfo.nbtInfos, tagKey, tagType)) {
-                    iconScoreMap.put(iconInfo, iconScoreMap.get(iconInfo) + 1);
+                try {
+                    if (compareValue(itemTags, iconInfo.nbtInfos, tagKey, tagType)) {
+                        iconScoreMap.put(iconInfo, iconScoreMap.get(iconInfo) + 1);
+                    }
+                } catch (Exception ignore) {
+                    AE2WebIntegration.LOG.atWarn().withThrowable(ignore).log("Error while comparing NBT (key: {}) for item {}", tagKey, toSearch.getItem().getRegistryName().toString());
                 }
             }
         }
