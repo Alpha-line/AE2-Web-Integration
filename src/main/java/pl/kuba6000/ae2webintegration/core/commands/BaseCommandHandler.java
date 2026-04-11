@@ -56,9 +56,12 @@ public class BaseCommandHandler extends CommandBase {
             Config.synchronizeConfiguration();
             int nbLoadedIcons = IconCache.loadCache();
             if (nbLoadedIcons >= 0) {
-                sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Successfully loaded " + nbLoadedIcons + " icons"));
+                sender.sendMessage(
+                    new TextComponentString(TextFormatting.GREEN + "Successfully loaded " + nbLoadedIcons + " icons"));
             } else {
-                sender.sendMessage(new TextComponentString(TextFormatting.RED + "Error while loading icons, check console for details"));
+                sender.sendMessage(
+                    new TextComponentString(
+                        TextFormatting.RED + "Error while loading icons, check console for details"));
             }
             AE2Controller.stopHTTPServer();
             AE2Controller.startHTTPServer();

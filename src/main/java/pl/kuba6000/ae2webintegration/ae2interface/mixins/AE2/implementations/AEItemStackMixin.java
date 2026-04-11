@@ -1,8 +1,8 @@
 package pl.kuba6000.ae2webintegration.ae2interface.mixins.AE2.implementations;
 
 import net.minecraft.item.Item;
-
 import net.minecraft.item.ItemStack;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 

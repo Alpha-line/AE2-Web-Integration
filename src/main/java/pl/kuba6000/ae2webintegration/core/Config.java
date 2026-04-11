@@ -32,10 +32,10 @@ public class Config {
     public static void synchronizeConfiguration() {
         Configuration configuration = new Configuration(configFile);
         NOTIFY_UPDATE_AVAILABLE = configuration.getBoolean(
-                "notify_update",
-                Configuration.CATEGORY_GENERAL,
-                NOTIFY_UPDATE_AVAILABLE,
-                "Notify in-game users / website users if an update is available");
+            "notify_update",
+            Configuration.CATEGORY_GENERAL,
+            NOTIFY_UPDATE_AVAILABLE,
+            "Notify in-game users / website users if an update is available");
         AE_PORT = configuration
             .getInt("port", Configuration.CATEGORY_GENERAL, AE_PORT, 1, 65535, "Port for the hosted website");
         AE_PASSWORD = configuration

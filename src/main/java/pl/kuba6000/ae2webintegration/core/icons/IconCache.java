@@ -1,12 +1,5 @@
 package pl.kuba6000.ae2webintegration.core.icons;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import pl.kuba6000.ae2webintegration.core.AE2WebIntegration;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +16,15 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+
+import pl.kuba6000.ae2webintegration.core.AE2WebIntegration;
+
 public class IconCache {
 
     private static Path atlasZipFile;
@@ -31,7 +33,9 @@ public class IconCache {
     private static List<IconInfo> loadedIcons = new ArrayList<>();
 
     public static void init(final File configDir) {
-        atlasZipFile = configDir.toPath().resolve("ae2webintegration").resolve("atlas.zip");
+        atlasZipFile = configDir.toPath()
+            .resolve("ae2webintegration")
+            .resolve("atlas.zip");
     }
 
     public static int loadCache() {
@@ -40,7 +44,11 @@ public class IconCache {
         if (Files.exists(atlasZipFile)) {
             return loadAtlas(atlasZipFile);
         } else {
-            AE2WebIntegration.LOG.atWarn().log("Error while loading icon cache : {} not found", atlasZipFile.toFile().getAbsolutePath());
+            AE2WebIntegration.LOG.atWarn()
+                .log(
+                    "Error while loading icon cache : {} not found",
+                    atlasZipFile.toFile()
+                        .getAbsolutePath());
             return -1;
         }
     }
@@ -48,7 +56,6 @@ public class IconCache {
     private static int loadAtlas(final Path zipPath) {
 
         String jsonIn;
-
 
         try {
             if (zipFile != null) {
@@ -58,13 +65,15 @@ public class IconCache {
             zipFile = new ZipFile(zipPath.toFile());
 
             jsonIn = new String(readAllBytes(zipFile.getInputStream(zipFile.getEntry("info.json"))));
-            Type listType = new TypeToken<List<IconInfo>>(){}.getType();
+            Type listType = new TypeToken<List<IconInfo>>() {}.getType();
             loadedIcons = new Gson().fromJson(jsonIn, listType);
             loadedIcons.forEach(IconInfo::extractNbtInfos);
             return loadedIcons.size();
 
         } catch (Exception e) {
-            AE2WebIntegration.LOG.atError().withThrowable(e).log("Error while loading icon cache :");
+            AE2WebIntegration.LOG.atError()
+                .withThrowable(e)
+                .log("Error while loading icon cache :");
             return -1;
         }
     }
@@ -78,23 +87,31 @@ public class IconCache {
         try {
             ZipEntry entry = zipFile.getEntry(id.elementId + ".png");
             if (entry == null) {
-                AE2WebIntegration.LOG.atError().log("Icon info for {} link to PNG ID {},  but it cannot be found inside the ZIP file", id.registryName, id.elementId);
+                AE2WebIntegration.LOG.atError()
+                    .log(
+                        "Icon info for {} link to PNG ID {},  but it cannot be found inside the ZIP file",
+                        id.registryName,
+                        id.elementId);
                 return null;
             } else {
                 return readAllBytes(zipFile.getInputStream(entry));
             }
         } catch (Exception e) {
-            AE2WebIntegration.LOG.atError().withThrowable(e).log("Error while reading texture {} from zip", id.elementId);
+            AE2WebIntegration.LOG.atError()
+                .withThrowable(e)
+                .log("Error while reading texture {} from zip", id.elementId);
             return null;
         }
     }
 
     public static byte[] getItemTexture(final ItemStack toSearch) {
         // Search with registry name
-        String nameToSearch = toSearch.getItem().getRegistryName().toString();
+        String nameToSearch = toSearch.getItem()
+            .getRegistryName()
+            .toString();
         List<IconInfo> listSearchByRegistry = loadedIcons.stream()
-                .filter(info -> info.registryName.equals(nameToSearch))
-                .collect(Collectors.toList());
+            .filter(info -> info.registryName.equals(nameToSearch))
+            .collect(Collectors.toList());
 
         if (listSearchByRegistry.isEmpty()) {
             return null;
@@ -104,8 +121,8 @@ public class IconCache {
 
         // Multiple elements have the same registry name, searching with damage value
         List<IconInfo> listSearchByDamage = listSearchByRegistry.stream()
-                .filter(info -> info.damageValue == toSearch.getItemDamage())
-                .collect(Collectors.toList());
+            .filter(info -> info.damageValue == toSearch.getItemDamage())
+            .collect(Collectors.toList());
 
         if (listSearchByDamage.isEmpty()) {
             // Instead of returning null, we return the first available texture by registry id
@@ -134,16 +151,25 @@ public class IconCache {
                         iconScoreMap.put(iconInfo, iconScoreMap.get(iconInfo) + 1);
                     }
                 } catch (Exception ignore) {
-                    AE2WebIntegration.LOG.atWarn().withThrowable(ignore).log("Error while comparing NBT (key: {}) for item {}", tagKey, toSearch.getItem().getRegistryName().toString());
+                    AE2WebIntegration.LOG.atWarn()
+                        .withThrowable(ignore)
+                        .log(
+                            "Error while comparing NBT (key: {}) for item {}",
+                            tagKey,
+                            toSearch.getItem()
+                                .getRegistryName()
+                                .toString());
                 }
             }
         }
 
         // Getting the max score
-        IconInfo iconInfo = iconScoreMap.entrySet().stream()
-                .sorted((o1, o2) -> Integer.compare(o2.getValue(), o1.getValue()))
-                .map(Map.Entry::getKey)
-                .findFirst().orElse(listSearchByDamage.get(0));
+        IconInfo iconInfo = iconScoreMap.entrySet()
+            .stream()
+            .sorted((o1, o2) -> Integer.compare(o2.getValue(), o1.getValue()))
+            .map(Map.Entry::getKey)
+            .findFirst()
+            .orElse(listSearchByDamage.get(0));
 
         return readPngFromId(iconInfo);
     }
@@ -169,13 +195,16 @@ public class IconCache {
                 return a.getDouble(key) == b.getDouble(key);
 
             case NBTType.STRING:
-                return a.getString(key).equals(b.getString(key));
+                return a.getString(key)
+                    .equals(b.getString(key));
 
             case NBTType.COMPOUND:
-                return a.getCompoundTag(key).equals(b.getCompoundTag(key));
+                return a.getCompoundTag(key)
+                    .equals(b.getCompoundTag(key));
 
             case NBTType.LIST:
-                return a.getTagList(key, 0).equals(b.getTagList(key, 0));
+                return a.getTagList(key, 0)
+                    .equals(b.getTagList(key, 0));
 
             case NBTType.BYTE_ARRAY:
                 return Arrays.equals(a.getByteArray(key), b.getByteArray(key));
@@ -194,6 +223,7 @@ public class IconCache {
     }
 
     public static final class NBTType {
+
         public static final byte END = 0;
         public static final byte BYTE = 1;
         public static final byte SHORT = 2;
