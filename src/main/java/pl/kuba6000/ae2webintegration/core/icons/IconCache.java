@@ -7,8 +7,10 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import pl.kuba6000.ae2webintegration.core.AE2WebIntegration;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,44 +20,53 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class IconCache {
 
-    private static Path baseAtlasPath;
+    private static Path atlasZipFile;
+    private static ZipFile zipFile;
 
     private static List<IconInfo> loadedIcons = new ArrayList<>();
 
     public static void init(final File configDir) {
-        baseAtlasPath = configDir.toPath().resolve("ae2webintegration").resolve("atlas");
+        atlasZipFile = configDir.toPath().resolve("ae2webintegration").resolve("atlas.zip");
     }
 
     public static int loadCache() {
         loadedIcons.clear();
 
-        Path atlasInfos = baseAtlasPath.resolve("info.json");
-
-        if (Files.exists(atlasInfos)) {
-            return loadAtlas(atlasInfos);
+        if (Files.exists(atlasZipFile)) {
+            return loadAtlas(atlasZipFile);
         } else {
-            AE2WebIntegration.LOG.atWarn().log("Error while loading icon cache : {} not found", atlasInfos.toFile().getAbsolutePath());
+            AE2WebIntegration.LOG.atWarn().log("Error while loading icon cache : {} not found", atlasZipFile.toFile().getAbsolutePath());
             return -1;
         }
     }
 
-    private static int loadAtlas(final Path atlasInfoPath) {
+    private static int loadAtlas(final Path zipPath) {
 
         String jsonIn;
+
+
         try {
-            jsonIn = new String(Files.readAllBytes(atlasInfoPath));
-        } catch (IOException e) {
+            if (zipFile != null) {
+                zipFile.close();
+            }
+
+            zipFile = new ZipFile(zipPath.toFile());
+
+            jsonIn = new String(readAllBytes(zipFile.getInputStream(zipFile.getEntry("info.json"))));
+            Type listType = new TypeToken<List<IconInfo>>(){}.getType();
+            loadedIcons = new Gson().fromJson(jsonIn, listType);
+            loadedIcons.forEach(IconInfo::extractNbtInfos);
+            return loadedIcons.size();
+
+        } catch (Exception e) {
             AE2WebIntegration.LOG.atError().withThrowable(e).log("Error while loading icon cache :");
             return -1;
         }
-
-        Type listType = new TypeToken<List<IconInfo>>(){}.getType();
-        loadedIcons = new Gson().fromJson(jsonIn, listType);
-        loadedIcons.forEach(IconInfo::extractNbtInfos);
-        return loadedIcons.size();
     }
 
     public static boolean isActive() {
@@ -63,11 +74,17 @@ public class IconCache {
     }
 
     private static byte[] readPngFromId(IconInfo id) {
-        Path toRead = baseAtlasPath.resolve(id.elementId + ".png");
+
         try {
-            return Files.readAllBytes(toRead);
-        } catch (IOException e) {
-            AE2WebIntegration.LOG.atError().withThrowable(e).log("Error while reading atlas texture {}", toRead.toFile().getAbsolutePath());
+            ZipEntry entry = zipFile.getEntry(id.elementId + ".png");
+            if (entry == null) {
+                AE2WebIntegration.LOG.atError().log("Icon info for {} link to PNG ID {},  but it cannot be found inside the ZIP file", id.registryName, id.elementId);
+                return null;
+            } else {
+                return readAllBytes(zipFile.getInputStream(entry));
+            }
+        } catch (Exception e) {
+            AE2WebIntegration.LOG.atError().withThrowable(e).log("Error while reading texture {} from zip", id.elementId);
             return null;
         }
     }
@@ -192,5 +209,22 @@ public class IconCache {
         public static final byte LONG_ARRAY = 12;
 
         private NBTType() {}
+    }
+
+    private static byte[] readAllBytes(final InputStream is) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[8192];
+        int len;
+
+        try {
+            while ((len = is.read(buffer)) != -1) {
+                out.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return out.toByteArray();
     }
 }
